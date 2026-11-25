@@ -12,6 +12,7 @@ defmodule Strongbox.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      aliases: aliases(),
       dialyzer: [
         plt_add_apps: [:mix, :ex_unit],
         plt_core_path: "priv/plts",
@@ -48,6 +49,21 @@ defmodule Strongbox.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
+    ]
+  end
+
+  defp aliases do
+    [
+      # On an up-to-date main, after the release pull request: check the
+      # repository, publish to Hex, then tag the version. The check runs in
+      # a child VM: once anything compiles in this VM, Mix no longer finds
+      # the tasks of the Hex archive.
+      release: [
+        "cmd mix strongbox.release_check",
+        "hex.publish --yes",
+        "cmd git tag v#{@version}",
+        "cmd git push origin v#{@version}"
+      ]
     ]
   end
 
