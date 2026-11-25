@@ -23,6 +23,11 @@ defmodule Strongbox.TestRepo do
   use Ecto.Repo, otp_app: :strongbox, adapter: Ecto.Adapters.Postgres
 end
 
+defmodule Strongbox.TestSQLiteRepo do
+  @moduledoc false
+  use Ecto.Repo, otp_app: :strongbox, adapter: Ecto.Adapters.SQLite3
+end
+
 defmodule Strongbox.TestUser do
   @moduledoc false
   use Ecto.Schema

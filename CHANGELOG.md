@@ -5,7 +5,7 @@ All notable changes to Strongbox are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and Strongbox follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-25
 
 ### Added
 
@@ -27,4 +27,12 @@ and Strongbox follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   isn't under the first key, by compare-and-swap.
 - Reading `Ecto.Encrypted`'s format, and writing it (`format: :ecto`);
   reading Cloak's AES.GCM and AES.CTR (`format: :cloak`, `:cloak_ctr`).
+- `Strongbox.Key.tag/1`: a tag made from the key itself, for keys that
+  come without a name.
 - `mix strongbox.gen.key`.
+
+### Fixed
+
+- `Strongbox.Rotation.run/3` on SQLite: in 0.1.0-dev it wrote nothing, and
+  counted every value as a conflict. It compared the stored bytes with a
+  parameter SQLite took for a text, which is never equal to a BLOB.

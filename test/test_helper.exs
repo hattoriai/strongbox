@@ -43,4 +43,27 @@ db? =
       false
   end
 
+# SQLite, in memory, for the same: it keeps an encrypted value as a BLOB,
+# which is never equal to a text.
+Application.put_env(:strongbox, Strongbox.TestSQLiteRepo,
+  database: ":memory:",
+  pool_size: 1,
+  log: false
+)
+
+{:ok, _} = Strongbox.TestSQLiteRepo.start_link()
+
+Ecto.Adapters.SQL.query!(Strongbox.TestSQLiteRepo, """
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  email BLOB,
+  ssn BLOB,
+  born_on BLOB,
+  notes BLOB,
+  email_index BLOB,
+  ssn_index BLOB
+)
+""")
+
 ExUnit.start(exclude: if(db?, do: [], else: [:db]))

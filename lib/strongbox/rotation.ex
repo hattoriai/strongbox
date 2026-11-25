@@ -166,14 +166,21 @@ defmodule Strongbox.Rotation do
   end
 
   # Sets `changes` (values the fields' types dump: encrypt, hash) where the
-  # row still holds `expected` (stored values, compared as stored).
+  # row still holds `expected` (stored values, compared as stored: as the
+  # column's own type, a binary or a text, and not as the field's, which
+  # would encrypt or hash them again. Without a type, SQLite takes a
+  # binary for a text, which is never equal to the column's BLOB).
   defp swap(repo, schema, id, expected, changes) do
     [pk] = schema.__schema__(:primary_key)
 
     query =
       Enum.reduce(expected, from(r in schema, where: field(r, ^pk) == ^id), fn
-        {field, nil}, query -> where(query, [r], is_nil(field(r, ^field)))
-        {field, raw}, query -> where(query, [r], fragment("? = ?", field(r, ^field), ^raw))
+        {field, nil}, query ->
+          where(query, [r], is_nil(field(r, ^field)))
+
+        {field, raw}, query ->
+          stored = Ecto.Type.type(schema.__schema__(:type, field))
+          where(query, [r], fragment("? = ?", field(r, ^field), type(^raw, ^stored)))
       end)
 
     case repo.update_all(query, set: changes) do
