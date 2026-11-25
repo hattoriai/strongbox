@@ -58,7 +58,7 @@ defmodule Strongbox.CipherTest do
       ciphertext = Cipher.encrypt(keys, "a secret", context: "c", pad: 16)
 
       for i <- 0..(byte_size(ciphertext) - 1) do
-        <<before::binary-size(i), byte, rest::binary>> = ciphertext
+        <<before::binary-size(^i), byte, rest::binary>> = ciphertext
         changed = <<before::binary, Bitwise.bxor(byte, 1), rest::binary>>
 
         assert Cipher.decrypt(keys, changed, context: "c") == :error,

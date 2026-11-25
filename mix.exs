@@ -10,6 +10,8 @@ defmodule Strongbox.MixProject do
       version: @version,
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
+      # test/fixtures/cloak.exs makes a fixture; it is not a test.
+      test_ignore_filters: [&String.starts_with?(&1, "test/fixtures/")],
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
