@@ -5,7 +5,7 @@ All notable changes to Strongbox are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and Strongbox follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-25
 
 ### Added
 
@@ -33,6 +33,6 @@ and Strongbox follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
-- `Strongbox.Rotation.run/3` on SQLite: it wrote nothing, and counted
-  every value as a conflict. It compared the stored bytes with a
+- `Strongbox.Rotation.run/3` on SQLite: in 0.1.0-dev it wrote nothing, and
+  counted every value as a conflict. It compared the stored bytes with a
   parameter SQLite took for a text, which is never equal to a BLOB.
