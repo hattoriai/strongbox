@@ -28,3 +28,9 @@ and Strongbox follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Reading `Ecto.Encrypted`'s format, and writing it (`format: :ecto`);
   reading Cloak's AES.GCM and AES.CTR (`format: :cloak`, `:cloak_ctr`).
 - `mix strongbox.gen.key`.
+
+### Fixed
+
+- `Strongbox.Rotation.run/3` on SQLite: it wrote nothing, and counted
+  every value as a conflict. It compared the stored bytes with a
+  parameter SQLite took for a text, which is never equal to a BLOB.

@@ -40,9 +40,10 @@ defmodule Strongbox.MixProject do
       # Encrypted maps and lists as JSON with Jason, beside Elixir's own JSON
       # (1.18 and later). Optional.
       {:jason, "~> 1.4", optional: true},
-      # Strongbox.Rotation's tests, against PostgreSQL.
+      # Strongbox.Rotation's tests, against PostgreSQL and SQLite.
       {:ecto_sql, "~> 3.10", only: :test},
       {:postgrex, "~> 0.19", only: :test},
+      {:ecto_sqlite3, "~> 0.22", only: :test},
       {:stream_data, "~> 1.1", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
