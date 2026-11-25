@@ -27,6 +27,8 @@ and Strongbox follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   isn't under the first key, by compare-and-swap.
 - Reading `Ecto.Encrypted`'s format, and writing it (`format: :ecto`);
   reading Cloak's AES.GCM and AES.CTR (`format: :cloak`, `:cloak_ctr`).
+- `Strongbox.Key.tag/1`: a tag made from the key itself, for keys that
+  come without a name.
 - `mix strongbox.gen.key`.
 
 ### Fixed

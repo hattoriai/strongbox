@@ -54,6 +54,22 @@ A key's tag is written in front of each value it encrypts, so Strongbox
 knows which key decrypts it. Tags are short and never reused for another
 key: `"k1"`, `"k2"`, or a date, `"2026-11"`.
 
+Keys that come without a name, such as a list in one environment
+variable, get their tags from `Strongbox.Key.tag/1`: the first 4 bytes of
+the key's SHA-256, in hex. A key always has the same tag, so the list can
+change without a name for each key:
+
+```elixir
+# config/runtime.exs
+keys =
+  for encoded <- String.split(System.fetch_env!("STRONGBOX_KEYS"), ","),
+      key = Strongbox.Key.decode!(encoded) do
+    %{tag: Strongbox.Key.tag(key), key: key}
+  end
+
+config :my_app, strongbox_keys: keys
+```
+
 ## Ciphers
 
 `:aes_256_gcm` by default. `:chacha20_poly1305` is as strong and faster on

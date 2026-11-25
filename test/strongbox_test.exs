@@ -83,6 +83,26 @@ defmodule StrongboxTest do
     end
   end
 
+  test "Strongbox.Key.tag/1 is the start of the key's SHA-256, in hex" do
+    # SHA-256("abc") starts with ba7816bf (FIPS 180-4). The tag is written
+    # in each value the key encrypts, so it must never change.
+    assert Strongbox.Key.tag("abc") == "ba7816bf"
+  end
+
+  test "keys without a name rotate, with Strongbox.Key.tag/1 for their tags" do
+    tagged = fn keys -> Enum.map(keys, &%{tag: Strongbox.Key.tag(&1), key: &1}) end
+    old = :binary.copy(<<1>>, 32)
+    new = :binary.copy(<<2>>, 32)
+
+    Application.put_env(:strongbox, :test_keys, tagged.([old]))
+    ciphertext = TestVault.encrypt("x")
+
+    Application.put_env(:strongbox, :test_keys, tagged.([new, old]))
+    assert TestVault.decrypt(ciphertext) == {:ok, "x"}
+    assert TestVault.stale?(ciphertext)
+    refute TestVault.stale?(TestVault.encrypt("x"))
+  end
+
   describe "hashes" do
     test "differ by context, so two indexes don't share hashes" do
       refute TestVault.hash("a@b.c", context: "email") ==

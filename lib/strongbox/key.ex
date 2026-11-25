@@ -10,7 +10,8 @@ defmodule Strongbox.Key do
   ## Fields
 
     * `:tag` - a binary of 1 to 127 bytes, written in front of each value
-      the key encrypts, so the right key is found to decrypt it.
+      the key encrypts, so the right key is found to decrypt it. A name
+      you give (`"k1"`), or `tag/1` of the key.
     * `:key` - the key itself, as a binary.
     * `:cipher` - for encryption keys, an AEAD cipher of `:crypto`:
       `:aes_256_gcm` (the default), `:aes_128_gcm`, `:aes_256_ccm` or
@@ -72,6 +73,25 @@ defmodule Strongbox.Key do
       {:ok, key} -> key
       :error -> raise ArgumentError, "expected a key in Base64"
     end
+  end
+
+  @doc """
+  A tag for `key`, made from the key itself: the first 4 bytes of its
+  SHA-256, in hex.
+
+  For keys that come without a name, such as a list in one environment
+  variable. A key always has the same tag and another key has another, so
+  keys are added and removed without naming them:
+
+      keys = for key <- keys, do: %{tag: Strongbox.Key.tag(key), key: key}
+
+  Make the tags where the keys are decoded, in `config/runtime.exs`, not in
+  the vault's callbacks.
+  """
+  @spec tag(binary) :: binary
+  def tag(key) when is_binary(key) do
+    <<start::binary-size(4), _rest::binary>> = :crypto.hash(:sha256, key)
+    Base.encode16(start, case: :lower)
   end
 
   @doc false
