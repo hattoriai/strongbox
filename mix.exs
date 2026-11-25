@@ -43,8 +43,6 @@ defmodule Strongbox.MixProject do
       # Strongbox.Rotation's tests, against PostgreSQL.
       {:ecto_sql, "~> 3.10", only: :test},
       {:postgrex, "~> 0.19", only: :test},
-      # Values Cloak wrote, for the tests of reading them.
-      {:cloak, "~> 1.1", only: :test},
       {:stream_data, "~> 1.1", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},

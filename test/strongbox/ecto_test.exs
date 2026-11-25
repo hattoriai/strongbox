@@ -1,8 +1,7 @@
 defmodule Strongbox.EctoTest do
   use ExUnit.Case, async: false
 
-  alias Cloak.Ciphers.AES
-  alias Strongbox.{TestUser, TestVault}
+  alias Strongbox.{CloakFixtures, TestUser, TestVault}
 
   setup do
     on_exit(&TestVault.reset/0)
@@ -77,26 +76,22 @@ defmodule Strongbox.EctoTest do
     test "loads values Cloak.Ecto wrote" do
       Application.put_env(:strongbox, :test_keys, [
         %{tag: "k1", key: :binary.copy(<<1>>, 32)},
-        %{tag: "AES.GCM.V1", key: :binary.copy(<<3>>, 32), format: :cloak}
+        %{tag: "AES.GCM.V1", key: CloakFixtures.key(), format: :cloak}
       ])
 
-      # Cloak.Ecto's types encrypt to_string/1 of numbers and times, and
-      # JSON of maps.
-      for {as, value, text} <- [
-            {:binary, "x", "x"},
-            {:integer, 42, "42"},
-            {:float, 1.5, "1.5"},
-            {:decimal, Decimal.new("12.50"), Decimal.to_string(Decimal.new("12.50"))},
-            {:time, ~T[09:30:00], to_string(~T[09:30:00])},
-            {{:array, :integer}, [1, 2], "[1,2]"},
-            {:date, ~D[1990-05-17], to_string(~D[1990-05-17])},
-            {:naive_datetime, ~N[2026-11-25 10:00:00], to_string(~N[2026-11-25 10:00:00])},
-            {:utc_datetime, ~U[2026-11-25 10:00:00Z], to_string(~U[2026-11-25 10:00:00Z])},
-            {:map, %{"a" => 1}, ~s({"a":1})}
+      for {name, as, value} <- [
+            {"binary", :binary, "x"},
+            {"integer", :integer, 42},
+            {"float", :float, 1.5},
+            {"decimal", :decimal, Decimal.new("12.50")},
+            {"time", :time, ~T[09:30:00]},
+            {"integer_list", {:array, :integer}, [1, 2]},
+            {"date", :date, ~D[1990-05-17]},
+            {"naive_datetime", :naive_datetime, ~N[2026-11-25 10:00:00]},
+            {"utc_datetime", :utc_datetime, ~U[2026-11-25 10:00:00Z]},
+            {"map", :map, %{"a" => 1}}
           ] do
-        {:ok, ciphertext} =
-          AES.GCM.encrypt(text, key: :binary.copy(<<3>>, 32), tag: "AES.GCM.V1")
-
+        {_text, ciphertext} = CloakFixtures.value(name)
         type = type(Strongbox.Encrypted, vault: TestVault, as: as)
         assert Ecto.Type.load(type, ciphertext) == {:ok, value}, "as: #{inspect(as)}"
       end

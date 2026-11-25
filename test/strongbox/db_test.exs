@@ -5,9 +5,8 @@ defmodule Strongbox.DBTest do
 
   import Ecto.Query
 
-  alias Cloak.Ciphers.AES
   alias Ecto.Adapters.SQL
-  alias Strongbox.{Query, Rotation, TestRepo, TestUser, TestVault}
+  alias Strongbox.{CloakFixtures, Query, Rotation, TestRepo, TestUser, TestVault}
 
   setup do
     :ok = SQL.Sandbox.checkout(TestRepo)
@@ -174,11 +173,11 @@ defmodule Strongbox.DBTest do
   end
 
   test "moves a table Cloak encrypted over to Strongbox, by rotation" do
-    cloak_key = :binary.copy(<<3>>, 32)
+    cloak_key = CloakFixtures.key()
     id = Ecto.UUID.generate()
 
-    {:ok, email} = AES.GCM.encrypt("ana@example.com", key: cloak_key, tag: "AES.GCM.V1")
-    {:ok, born_on} = AES.GCM.encrypt(to_string(~D[1990-05-17]), key: cloak_key, tag: "AES.GCM.V1")
+    {"ana@example.com", email} = CloakFixtures.value("email")
+    {"1990-05-17", born_on} = CloakFixtures.value("date")
     hash = :crypto.mac(:hmac, :sha256, :binary.copy(<<9>>, 32), "ana@example.com")
 
     SQL.query!(

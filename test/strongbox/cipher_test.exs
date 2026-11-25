@@ -2,8 +2,7 @@ defmodule Strongbox.CipherTest do
   use ExUnit.Case, async: true
   use ExUnitProperties
 
-  alias Cloak.Ciphers.AES
-  alias Strongbox.{Cipher, Key}
+  alias Strongbox.{Cipher, CloakFixtures, Key}
 
   @k32 :binary.copy(<<1>>, 32)
   @k16 :binary.copy(<<2>>, 16)
@@ -153,33 +152,26 @@ defmodule Strongbox.CipherTest do
   describe "values Cloak wrote" do
     test "AES.GCM, with Cloak's default and a configured IV length" do
       for iv_length <- [16, 12] do
-        {:ok, ciphertext} =
-          AES.GCM.encrypt("from cloak",
-            key: @k32,
-            tag: "AES.GCM.V1",
-            iv_length: iv_length
-          )
+        keys = [
+          key([]),
+          key(tag: "AES.GCM.V1", key: CloakFixtures.key(), format: :cloak, iv_length: iv_length)
+        ]
 
-        keys = [key([]), key(tag: "AES.GCM.V1", format: :cloak, iv_length: iv_length)]
-        assert Cipher.decrypt(keys, ciphertext, context: "anything") == {:ok, "from cloak"}
+        assert Cipher.decrypt(keys, CloakFixtures.gcm(iv_length), context: "anything") ==
+                 {:ok, "from cloak"}
       end
     end
 
     test "AES.CTR" do
-      {:ok, ciphertext} =
-        AES.CTR.encrypt("from cloak ctr", key: @k32, tag: "AES.CTR.V1")
-
-      keys = [key([]), key(tag: "AES.CTR.V1", format: :cloak_ctr)]
-      assert Cipher.decrypt(keys, ciphertext, []) == {:ok, "from cloak ctr"}
+      keys = [key([]), key(tag: "AES.CTR.V1", key: CloakFixtures.key(), format: :cloak_ctr)]
+      assert Cipher.decrypt(keys, CloakFixtures.ctr(), []) == {:ok, "from cloak ctr"}
     end
 
     test "a changed Cloak GCM value fails" do
-      {:ok, ciphertext} =
-        AES.GCM.encrypt("from cloak", key: @k32, tag: "AES.GCM.V1")
-
-      <<head::binary-size(30), byte, rest::binary>> = ciphertext
+      <<head::binary-size(30), byte, rest::binary>> = CloakFixtures.gcm(16)
       changed = <<head::binary, Bitwise.bxor(byte, 1), rest::binary>>
-      assert Cipher.decrypt([key(tag: "AES.GCM.V1", format: :cloak)], changed, []) == :error
+      keys = [key(tag: "AES.GCM.V1", key: CloakFixtures.key(), format: :cloak)]
+      assert Cipher.decrypt(keys, changed, []) == :error
     end
 
     test "Cloak keys only read" do
